@@ -1,0 +1,52 @@
+---
+export const partial = true;
+
+import { supabase } from 'src/lib/supabase';
+import Listbar from '@components/Listbar.astro';
+
+let { list } = Astro.params;
+if (!['groceries', 'todos', 'cleaning'].includes(list as string))
+	return new Response('Invalid endpoint: ' + list + '.');
+type ListType = "groceries" | "todos" | "cleaning";
+const listType: ListType = list as ListType;
+
+const { data, error } = await supabase.auth.getSession();
+if (data!.session!.user.role != 'authenticated' || error) {
+	return new Response('Not authenticated.');
+}
+// Handle adding here then rendering
+if (Astro.request.method == 'POST') {
+	const user = data!.session!.user;
+	const todoText = (await Astro.request.formData()).get('itemtext');
+	if (!todoText) return new Response('No item text.');
+	console.log(todoText);
+	const row = await supabase.from('userdata').select().eq('userid', user.id);
+	const name = row.data![0].name as string;
+	console.log(name);
+}
+
+const index = 1;
+const itemText =
+	'Totally from a database Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. ';
+---
+
+<Listbar active={listType} />
+<div class="join join-horizontal h-min bg-base-300">
+	<div
+		class="text-mono join-item flex aspect-square flex-col items-center justify-center bg-white px-4 text-center font-bold text-black"
+	>
+		{index}
+	</div>
+	<div class="join-item flex flex-col justify-center px-4 py-2">
+		{itemText}
+		<span class="mt-1 text-xs text-neutral-500">Added by: Trevor</span>
+	</div>
+	<div
+		class="delete-div hidden items-center data-[visible=true]:flex"
+		data-visible="false"
+	>
+		<button class="delete-button btn btn-error join-item min-h-full"
+			>Delete</button
+		>
+	</div>
+</div>

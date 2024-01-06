@@ -1,0 +1,20 @@
+---
+export interface Props {
+	active: 'groceries' | 'cleaning' | 'todos';
+}
+
+const { active } = Astro.props;
+---
+
+<div role="tablist" class="tabs tabs-lifted">
+	<a role="tab" class:list={['tab', active == 'todos' && 'tab-active']}
+		>Todos
+	</a
+	>
+	<a role="tab" class:list={['tab', active == 'groceries' && 'tab-active']}
+		>Groceries</a
+	>
+	<a role="tab" class:list={['tab', active == 'cleaning' && 'tab-active']}
+		>Cleaning</a
+	>
+</div>
