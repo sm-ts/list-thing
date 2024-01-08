@@ -32,6 +32,9 @@ dependencies:
   prettier-plugin-tailwindcss:
     specifier: ^0.5.11
     version: 0.5.11(prettier-plugin-astro@0.12.3)(prettier@3.1.1)
+  remixicon:
+    specifier: ^4.0.1
+    version: 4.0.1
   tailwindcss:
     specifier: ^3.4.1
     version: 3.4.1
@@ -3646,6 +3649,10 @@ packages:
       '@types/mdast': 4.0.3
       mdast-util-to-markdown: 2.1.0
       unified: 11.0.4
+    dev: false
+
+  /remixicon@4.0.1:
+    resolution: {integrity: sha512-Apa13Q01mFIuQEMvSVni8NnF9cV0vud9YXb2prQ+g3jmWpxKoFCL+yIiQ+9JCeLptdGKyoqVjCYOwwBQVHdciQ==}
     dev: false
 
   /request-light@0.7.0:

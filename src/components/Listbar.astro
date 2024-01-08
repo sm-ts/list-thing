@@ -1,20 +1,79 @@
 ---
 export interface Props {
-	active: 'groceries' | 'cleaning' | 'todos';
+	defaultList: string;
 }
 
-const { active } = Astro.props;
+const { defaultList } = Astro.props;
+let isGroceries = defaultList == 'groceries';
+let isTodos = defaultList == 'todos';
+let isCleaning = defaultList == 'cleaning';
+
+if (!(isGroceries || isTodos || isCleaning)) isTodos = true;
 ---
 
-<div role="tablist" class="tabs tabs-lifted">
-	<a role="tab" class:list={['tab', active == 'todos' && 'tab-active']}
-		>Todos
-	</a
+<div role="tablist" class="tabs tabs-lifted md:mx-auto mx-4 md:w-3/4">
+	<input
+		type="radio"
+		name="todo-tabs"
+		role="tab"
+		class:list={[
+			'tab !w-max [--tab-bg:#2c323b] [--tab-border-color:transparent]',
+		]}
+		aria-label="Todos"
+		checked
+		hx-get="/api/lists/todos"
+		hx-target="#todos-panel"
+		hx-trigger={isTodos ? 'load' : 'click'}
+		hx-swap="innerHTML"
+	/>
+	<div
+		id="todos-panel"
+		role="tabpanel"
+		class="tab-content rounded-box border-neutral bg-neutral p-6"
 	>
-	<a role="tab" class:list={['tab', active == 'groceries' && 'tab-active']}
-		>Groceries</a
+	</div>
+
+	<input
+		type="radio"
+		name="todo-tabs"
+		role="tab"
+		class:list={[
+			'tab !w-max [--tab-bg:#2c323b] [--tab-border-color:transparent]',
+		]}
+		aria-label="Groceries"
+		hx-get="/api/lists/groceries"
+		hx-target="#groceries-panel"
+		hx-trigger={isGroceries ? 'load' : 'click'}
+		hx-swap="innerHTML"
+	/>
+	<div
+		id="groceries-panel"
+		role="tabpanel"
+		class="tab-content rounded-box border-neutral bg-neutral p-6"
 	>
-	<a role="tab" class:list={['tab', active == 'cleaning' && 'tab-active']}
-		>Cleaning</a
+	</div>
+
+	<input
+		type="radio"
+		name="todo-tabs"
+		role="tab"
+		class:list={[
+			'tab !w-max [--tab-bg:#2c323b] [--tab-border-color:transparent]',
+		]}
+		aria-label="Cleaning"
+		hx-get="/api/lists/cleaning"
+		hx-target="#cleaning-panel"
+		hx-trigger={isCleaning ? 'load' : 'click'}
+		hx-swap="innerHTML"
+	/>
+	<div
+		id="cleaning-panel"
+		role="tabpanel"
+		class="tab-content rounded-box border-neutral bg-neutral p-6"
 	>
+	</div>
+</div>
+
+<div>
+	<button class="btn">Delete Mode</button>
 </div>

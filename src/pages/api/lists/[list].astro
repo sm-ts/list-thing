@@ -1,52 +1,147 @@
 ---
 export const partial = true;
 
+import Entry from '@components/Entry.astro';
 import { supabase } from 'src/lib/supabase';
-import Listbar from '@components/Listbar.astro';
 
 let { list } = Astro.params;
 if (!['groceries', 'todos', 'cleaning'].includes(list as string))
 	return new Response('Invalid endpoint: ' + list + '.');
-type ListType = "groceries" | "todos" | "cleaning";
+type ListType = 'groceries' | 'todos' | 'cleaning';
 const listType: ListType = list as ListType;
+let typeSingular = '';
+switch (listType) {
+	case 'groceries':
+		typeSingular = 'grocery';
+		break;
+	case 'cleaning':
+		typeSingular = 'cleaning';
+		break;
+	case 'todos':
+		typeSingular = 'todo';
+		break;
+}
 
 const { data, error } = await supabase.auth.getSession();
 if (data!.session!.user.role != 'authenticated' || error) {
 	return new Response('Not authenticated.');
 }
+
+const user = data!.session!.user;
+console.log(user)
+
 // Handle adding here then rendering
-if (Astro.request.method == 'POST') {
-	const user = data!.session!.user;
-	const todoText = (await Astro.request.formData()).get('itemtext');
+if (Astro.request.method == 'PUT') {
+	const formData = await Astro.request.formData();
+	const todoText = formData.get('itemtext');
+	const estTime = formData.get('esttime');
+	console.log(formData);
 	if (!todoText) return new Response('No item text.');
-	console.log(todoText);
+
+	const user = data!.session!.user;
 	const row = await supabase.from('userdata').select().eq('userid', user.id);
 	const name = row.data![0].name as string;
-	console.log(name);
 }
 
-const index = 1;
-const itemText =
-	'Totally from a database Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. ';
+const { data: query, error: queryErr } = await supabase
+	.from('entries')
+	.select()
+	.eq('category', listType);
+if (queryErr) return new Response(JSON.stringify(queryErr));
+
+// console.log(query);
 ---
 
-<Listbar active={listType} />
-<div class="join join-horizontal h-min bg-base-300">
-	<div
-		class="text-mono join-item flex aspect-square flex-col items-center justify-center bg-white px-4 text-center font-bold text-black"
-	>
-		{index}
-	</div>
-	<div class="join-item flex flex-col justify-center px-4 py-2">
-		{itemText}
-		<span class="mt-1 text-xs text-neutral-500">Added by: Trevor</span>
-	</div>
-	<div
-		class="delete-div hidden items-center data-[visible=true]:flex"
-		data-visible="false"
-	>
-		<button class="delete-button btn btn-error join-item min-h-full"
-			>Delete</button
-		>
-	</div>
+<div class="flex w-full flex-col">
+	{
+		query.map(item => (
+			<>
+				<Entry
+					index={item.id}
+					itemText={item.text}
+					author={item.created_by}
+				/>
+			</>
+		))
+	}
 </div>
+
+<form
+	id={`add-form-${listType}`}
+	class="add-form form-control join join-horizontal mb-2 h-min min-h-16 w-full max-w-full bg-base-300"
+	hx-target="#list-field"
+	hx-swap="innerHTML"
+	data-for={listType}
+>
+	<div
+		class="text-mono join-item flex aspect-square w-12 flex-col items-center justify-center bg-white text-center font-bold text-black"
+	>
+		<!-- <i class="ri-chat-new-fill fill-black stroke-black text-black"></i> -->
+		<span> n{' '}</span>
+	</div>
+	<div
+		class="join join-item join-vertical w-full flex-col py-2 md:join-horizontal md:flex-row"
+	>
+		<div
+			class="join-item mb-2 flex w-full content-center px-4 md:mb-0 md:pr-0"
+		>
+			<input
+				class="input input-bordered input-sm my-auto w-full min-w-full max-w-3 text-sm md:input-md placeholder:font-mono placeholder:text-sm md:max-w-none"
+				name="itemtext"
+				type="text"
+				id="new-item"
+				placeholder={`New ${typeSingular} item`}
+				required
+			/>
+		</div>
+		<div
+			class="join-item flex w-full content-center justify-center px-4 md:pl-0"
+		>
+			<div class="join join-horizontal w-full md:join-horizontal">
+				<i
+					class="ri-time-fill md:ri-lg mx-2 my-auto hidden md:mx-4 md:inline"
+				></i>
+				<input
+					class="ma-w-32 input join-item input-bordered input-sm my-auto w-full !rounded-l-lg !rounded-r-none text-center font-mono text-sm [appearance:textfield] md:input-md md:max-w-none md:!rounded-r-none md:!rounded-bl-lg md:!rounded-tl-lg [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+					name="esttimenum"
+					type="number"
+					id="new-item"
+				/>
+				<select
+					class="join-item select select-bordered select-sm my-auto max-w-xs
+					!rounded-l-none
+					!rounded-r-lg
+					font-mono
+					text-xs
+					md:select-md md:!rounded-l-none md:!rounded-r-lg md:text-sm"
+					form={`add-form-${listType}`}
+					name="esttimetype"
+				>
+					<option value="secs">Second(s)</option>
+					<option value="mins" selected>Minute(s)</option>
+					<option value="hrs">Hour(s)</option>
+					<option value="days">Day(s)</option>
+				</select>
+			</div>
+		</div>
+	</div>
+	<button
+		class="join-item bg-white px-4 font-mono text-black"
+		type="submit"
+		id={`add-button-${listType}`}
+		><i class="ri-add-circle-fill ri-lg"></i></button
+	>
+</form>
+
+<script is:inline>
+	document.querySelectorAll(`.add-form`).forEach(el => {
+		el.addEventListener('submit', e => {
+			e.preventDefault;
+			const el = e.target;
+			const type = el.dataset.for;
+
+			var url = `/api/lists/${type}`;
+			fetch(url, { method: 'PUT', body: new FormData(el) });
+		});
+	});
+</script>
