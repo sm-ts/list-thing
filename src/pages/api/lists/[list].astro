@@ -27,20 +27,35 @@ if (data!.session!.user.role != 'authenticated' || error) {
 	return new Response('Not authenticated.');
 }
 
-const user = data!.session!.user;
-console.log(user)
-
 // Handle adding here then rendering
 if (Astro.request.method == 'PUT') {
 	const formData = await Astro.request.formData();
 	const todoText = formData.get('itemtext');
-	const estTime = formData.get('esttime');
-	console.log(formData);
+	const estTime = formData.get('esttimenum');
+	const estTimeType = formData.get('esttimetype');
 	if (!todoText) return new Response('No item text.');
 
 	const user = data!.session!.user;
 	const row = await supabase.from('userdata').select().eq('userid', user.id);
-	const name = row.data![0].name as string;
+	const createdById = row.data![0].id as string;
+
+	await supabase.from('entries').insert([
+		{
+			text: todoText,
+			created_by: createdById,
+			category: listType,
+			est_time: estTime,
+			est_time_type: estTimeType,
+		},
+	]);
+}
+
+if (Astro.request.method == 'DELETE') {
+	const formData = await Astro.request.formData();
+	const index = formData.get('index');
+	// if (!todoText) return new Response('No item text.');
+
+	await supabase.from('entries').delete().eq('id', index);
 }
 
 const { data: query, error: queryErr } = await supabase
@@ -48,8 +63,6 @@ const { data: query, error: queryErr } = await supabase
 	.select()
 	.eq('category', listType);
 if (queryErr) return new Response(JSON.stringify(queryErr));
-
-// console.log(query);
 ---
 
 <div class="flex w-full flex-col">
@@ -60,6 +73,9 @@ if (queryErr) return new Response(JSON.stringify(queryErr));
 					index={item.id}
 					itemText={item.text}
 					author={item.created_by}
+					type={listType}
+					time={item.est_time}
+					timeType={item.est_time_type}
 				/>
 			</>
 		))
@@ -67,8 +83,9 @@ if (queryErr) return new Response(JSON.stringify(queryErr));
 </div>
 
 <form
+	autocomplete="off"
 	id={`add-form-${listType}`}
-	class="add-form form-control join join-horizontal mb-2 h-min min-h-16 w-full max-w-full bg-base-300"
+	class="add-form form-control join join-horizontal h-min min-h-16 w-full max-w-full bg-base-300"
 	hx-target="#list-field"
 	hx-swap="innerHTML"
 	data-for={listType}
@@ -86,7 +103,7 @@ if (queryErr) return new Response(JSON.stringify(queryErr));
 			class="join-item mb-2 flex w-full content-center px-4 md:mb-0 md:pr-0"
 		>
 			<input
-				class="input input-bordered input-sm my-auto w-full min-w-full max-w-3 text-sm md:input-md placeholder:font-mono placeholder:text-sm md:max-w-none"
+				class="input input-bordered input-sm my-auto w-full min-w-full max-w-3 text-sm md:input-md placeholder:font-mono placeholder:text-sm md:min-w-full md:max-w-none"
 				name="itemtext"
 				type="text"
 				id="new-item"
@@ -95,17 +112,18 @@ if (queryErr) return new Response(JSON.stringify(queryErr));
 			/>
 		</div>
 		<div
-			class="join-item flex w-full content-center justify-center px-4 md:pl-0"
+			class="join-item flex w-full content-center justify-center px-4 md:w-min md:pl-0"
 		>
 			<div class="join join-horizontal w-full md:join-horizontal">
 				<i
 					class="ri-time-fill md:ri-lg mx-2 my-auto hidden md:mx-4 md:inline"
 				></i>
 				<input
-					class="ma-w-32 input join-item input-bordered input-sm my-auto w-full !rounded-l-lg !rounded-r-none text-center font-mono text-sm [appearance:textfield] md:input-md md:max-w-none md:!rounded-r-none md:!rounded-bl-lg md:!rounded-tl-lg [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+					class="ma-w-32 md:max-w- input join-item input-bordered input-sm my-auto w-full !rounded-l-lg !rounded-r-none text-center font-mono text-sm [appearance:textfield] md:input-md md:min-w-16 md:!rounded-r-none md:!rounded-bl-lg md:!rounded-tl-lg [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 					name="esttimenum"
 					type="number"
 					id="new-item"
+					min="0"
 				/>
 				<select
 					class="join-item select select-bordered select-sm my-auto max-w-xs

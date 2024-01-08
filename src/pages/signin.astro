@@ -28,7 +28,7 @@ if (accessToken && refreshToken) {
 				<div class="divider"></div>
 				{
 					!querySuccess && (
-						<h2 class="font-bold text-error pb-2 text-xs">
+						<h2 class="pb-2 text-xs font-bold text-error">
 							No account was found under these credentials.
 						</h2>
 					)
@@ -36,7 +36,7 @@ if (accessToken && refreshToken) {
 				<!-- <label class="text-neutral-500" for="email" for="email">Email</label> -->
 				<input
 					placeholder="Email"
-					class="min-w-3/4 md:min-w-11/12 input bg-neutral-800 font-mono placeholder:font-mono placeholder:text-sm focus:bg-neutral-700"
+					class="min-w-3/4 md:min-w-11/12 input bg-neutral-800 font-mono placeholder:font-mono placeholder:text-sm autofill:font-mono focus:bg-neutral-700"
 					type="email"
 					name="email"
 					id="email"

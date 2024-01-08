@@ -12,7 +12,7 @@ if (!accessToken || !refreshToken) {
 	return Astro.redirect('/signin');
 }
 
-const { data, error } = await supabase.auth.setSession({
+const { error } = await supabase.auth.setSession({
 	refresh_token: refreshToken.value,
 	access_token: accessToken.value,
 });
@@ -30,7 +30,7 @@ if (error) {
 
 // const email = data?.user?.email;
 const queryParameters = Astro.url.searchParams;
-const defaultList = queryParameters.get("default") ?? "";
+const defaultList = queryParameters.get('default') ?? '';
 
 const { data: session, error: sessionError } = await supabase.auth.getSession();
 if (session!.session!.user.role != 'authenticated' || sessionError) {
@@ -38,7 +38,10 @@ if (session!.session!.user.role != 'authenticated' || sessionError) {
 }
 
 const user = session!.session!.user;
-const { data: query } = await supabase.from('userdata').select().eq('userid', user.id);
+const { data: query } = await supabase
+	.from('userdata')
+	.select()
+	.eq('userid', user.id);
 const name = query![0].name as string;
 ---
 
@@ -48,15 +51,4 @@ const name = query![0].name as string;
 		<button class="btn" type="submit">Sign out</button>
 	</form>
 	<Listbar {defaultList} />
-	<!-- <div id="list-field" hx-get="/api/lists/groceries" hx-trigger="load, click from:.delete-button"></div> -->
-	<form
-		hx-post="/api/lists/groceries"
-		hx-target="#list-field"
-		hx-swap="innerHTML"
-		method="post"
-		
-	>
-		<input name="itemtext" type="text" id="new-item" />
-	</form>
-	<button type="button" class="delete-button">Click me</button>
 </Layout>
