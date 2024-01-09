@@ -23,7 +23,7 @@ if (!(isGroceries || isTodos || isCleaning)) isTodos = true;
 		checked
 		hx-get="/api/lists/todos"
 		hx-target="#todos-panel"
-		hx-trigger={isTodos ? 'load' : 'load'}
+		hx-trigger={isTodos ? 'load' : 'click'}
 		hx-swap="innerHTML"
 	/>
 	<div
@@ -43,7 +43,7 @@ if (!(isGroceries || isTodos || isCleaning)) isTodos = true;
 		aria-label="Groceries"
 		hx-get="/api/lists/groceries"
 		hx-target="#groceries-panel"
-		hx-trigger={isGroceries ? 'load' : 'load'}
+		hx-trigger={isGroceries ? 'load' : 'click'}
 		hx-swap="innerHTML"
 	/>
 	<div
@@ -63,7 +63,7 @@ if (!(isGroceries || isTodos || isCleaning)) isTodos = true;
 		aria-label="Cleaning"
 		hx-get="/api/lists/cleaning"
 		hx-target="#cleaning-panel"
-		hx-trigger={isCleaning ? 'load' : 'load'}
+		hx-trigger={isCleaning ? 'load' : 'click'}
 		hx-swap="innerHTML"
 	/>
 	<div
