@@ -1,0 +1,59 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const { cookies, redirect, url } = Astro;
+
+const querySuccess = !!+(url.searchParams.get('success') || true) as boolean;
+// console.log(typeof querySuccess, querySuccess);
+
+const accessToken = cookies.get('sb-access-token');
+const refreshToken = cookies.get('sb-refresh-token');
+
+if (accessToken && refreshToken) {
+	return redirect('/dashboard');
+}
+---
+
+<Layout title="Sign in">
+	<div class="flex h-screen w-full items-center justify-center px-10">
+		<section
+			class="mx-auto flex w-full max-w-[28rem] flex-col rounded-lg bg-base-300 px-4 pb-12 pt-10 md:w-[28rem] md:px-8 lg:h-fit"
+		>
+			<h1 class="text-center font-sans text-3xl font-bold">Sign in</h1>
+			<form
+				action="/api/auth/signin"
+				method="post"
+				class="mx-auto flex flex-col md:mx-10"
+			>
+				<div class="divider"></div>
+				{
+					!querySuccess && (
+						<h2 class="pb-2 text-xs font-bold text-error">
+							No account was found under these credentials.
+						</h2>
+					)
+				}
+				<!-- <label class="text-neutral-500" for="email" for="email">Email</label> -->
+				<input
+					placeholder="Email"
+					class="min-w-3/4 md:min-w-11/12 input bg-neutral-800 font-mono placeholder:font-mono placeholder:text-sm autofill:font-mono focus:bg-neutral-700"
+					type="email"
+					name="email"
+					id="email"
+				/>
+				<!-- <label class="text-neutral-500 mt-2" for="password">Password</label> -->
+				<input
+					placeholder="Password"
+					class="min-w-xs md:min-w-11/12 input mt-4 bg-neutral-800 font-mono placeholder:font-mono placeholder:text-sm focus:bg-neutral-700"
+					type="password"
+					name="password"
+					id="password"
+				/>
+				<button
+					class="min-w-xs md:min-w-11/12 btn btn-primary mt-4 font-bold"
+					type="submit">Once More Unto the Breach... &rarr;</button
+				>
+			</form>
+		</section>
+	</div>
+</Layout>

@@ -1,0 +1,10 @@
+---
+type Endpoints = ["groceries" , "todos" , "cleaning"]
+export interface Props {
+	url: `/api/lists/${Endpoints[number]}`
+}
+
+const { url } = Astro.props;
+---
+
+<div id="list-field" hx-get={url} hx-trigger="intersect once, click from:.delete-button"></div>

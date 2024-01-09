@@ -1,0 +1,62 @@
+---
+import { supabase } from 'src/lib/supabase';
+
+export interface Props {
+	index: number | string;
+	itemText: string;
+	author: string;
+	type: string;
+	time: string;
+	timeType: string;
+}
+const { index, itemText, author, type, time, timeType } = Astro.props;
+let correctedTimeType =
+	time == '1' ? timeType.substring(0, timeType.length - 1) : timeType;
+
+const { data, error } = await supabase
+	.from('userdata')
+	.select()
+	.eq('id', author);
+const authorName =
+	error == null ? (data as any)[0].name : 'error finding author';
+---
+
+<div class="join join-horizontal mb-2 h-min min-h-16 bg-base-300">
+	<div
+		class="text-mono join-item flex aspect-square w-12 flex-col items-center justify-center bg-white text-center font-bold text-black"
+	>
+		{index}
+	</div>
+	<div class="join-item flex w-full flex-col justify-center px-4 py-2">
+		{itemText}
+		<span class="mt-1 text-xs text-neutral-500"
+			>Added by: {authorName} | <i class="ri-time-fill"></i>
+			{time}
+			{correctedTimeType}</span
+		>
+	</div>
+	<button
+		hx-delete={`/api/lists/${type}`}
+		hx-target={`#${type}-panel`}
+		hx-trigger="click"
+		hx-swap="innerHTML"
+		hx-vals={`"index": "${index}"`}
+		class="join-item justify-self-end !rounded-r-lg bg-white px-4 font-mono text-black"
+		type="submit"
+		id={`remove-button-${index}`}
+		><i class="ri-checkbox-circle-line ri-lg"></i></button
+	>
+	<div
+		class="delete-div hidden items-center data-[visible=true]:flex"
+		data-visible="false"
+	>
+		<button
+			hx-delete={`/api/lists/${type}`}
+			hx-target={`#${type}-panel`}
+			hx-trigger="click"
+			hx-swap="innerHTML"
+			class="delete-button btn btn-error join-item min-h-full"
+			>Delete</button
+		>
+	</div>
+</div>

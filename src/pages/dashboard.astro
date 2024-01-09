@@ -1,0 +1,54 @@
+---
+import Listbar from '@components/Listbar.astro';
+import Layout from '../layouts/Layout.astro';
+import { supabase } from '../lib/supabase';
+
+const { cookies } = Astro;
+
+const accessToken = cookies.get('sb-access-token');
+const refreshToken = cookies.get('sb-refresh-token');
+
+if (!accessToken || !refreshToken) {
+	return Astro.redirect('/signin');
+}
+
+const { error } = await supabase.auth.setSession({
+	refresh_token: refreshToken.value,
+	access_token: accessToken.value,
+});
+
+if (error) {
+	cookies.delete('sb-access-token', {
+		path: '/',
+	});
+	cookies.delete('sb-refresh-token', {
+		path: '/',
+	});
+
+	return Astro.redirect('/signin');
+}
+
+// const email = data?.user?.email;
+const queryParameters = Astro.url.searchParams;
+const defaultList = queryParameters.get('default') ?? '';
+
+const { data: session, error: sessionError } = await supabase.auth.getSession();
+if (session!.session!.user.role != 'authenticated' || sessionError) {
+	return new Response('Not authenticated.');
+}
+
+const user = session!.session!.user;
+const { data: query } = await supabase
+	.from('userdata')
+	.select()
+	.eq('userid', user.id);
+const name = query![0].name as string;
+---
+
+<Layout title="dashboard">
+	<h1 class="text-center">Hello {name}!</h1>
+	<form class="mb-4" action="/api/auth/signout">
+		<button class="btn" type="submit">Sign out</button>
+	</form>
+	<Listbar {defaultList} />
+</Layout>
