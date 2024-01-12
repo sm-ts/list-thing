@@ -31,7 +31,7 @@ if (data!.session!.user.role != 'authenticated' || error) {
 if (Astro.request.method == 'PUT') {
 	const formData = await Astro.request.formData();
 	const todoText = formData.get('itemtext');
-	const estTime = formData.get('esttimenum');
+	const estTime = formData.get('esttimenum') || "-1";
 	const estTimeType = formData.get('esttimetype');
 	if (!todoText) return new Response('No item text.');
 
@@ -39,7 +39,7 @@ if (Astro.request.method == 'PUT') {
 	const row = await supabase.from('userdata').select().eq('userid', user.id);
 	const createdById = row.data![0].id as string;
 
-	await supabase.from('entries').insert([
+	const {error} =  await supabase.from('entries').insert([
 		{
 			text: todoText,
 			created_by: createdById,
@@ -48,6 +48,7 @@ if (Astro.request.method == 'PUT') {
 			est_time_type: estTimeType,
 		},
 	]);
+	console.log(error)
 }
 
 if (Astro.request.method == 'DELETE') {
@@ -103,7 +104,7 @@ if (queryErr) return new Response(JSON.stringify(queryErr));
 			class="join-item mb-2 flex w-full content-center px-4 md:mb-0 md:pr-0"
 		>
 			<input
-				class="input input-bordered input-sm my-auto w-full min-w-full max-w-3 text-sm md:input-md placeholder:font-mono placeholder:text-sm md:min-w-full md:max-w-none"
+				class="input input-bordered input-sm my-auto w-full min-w-full max-w-3 text-sm md:input-md placeholder:font-mono placeholder:text-sm md:min-w-full md:max-w-none font-mono"
 				name="itemtext"
 				type="text"
 				id="new-item"
