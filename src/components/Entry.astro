@@ -10,7 +10,7 @@ export interface Props {
 	timeType: string;
 }
 const { index, itemText, author, type, time, timeType } = Astro.props;
-const hasTime = time.toString() != "-1";
+const hasTime = time.toString() > "0";
 let correctedTimeType =
 	time == '1' ? timeType.substring(0, timeType.length - 1) : timeType;
 
@@ -31,7 +31,7 @@ const authorName =
 	<div class="join-item flex w-full flex-col justify-center px-4 py-2">
 		{itemText}
 		<span class="mt-1 text-xs text-neutral-500"
-			>Added by: {authorName} {hasTime && <>| <i class="ri-time-fill"></i>
+			><i class="ri-account-circle-fill"></i> {authorName} {hasTime && <>| <i class="ri-time-fill"></i>
 			{time}{" "}{correctedTimeType}</>}</span
 		>
 	</div>
